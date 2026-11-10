@@ -1,0 +1,8 @@
+{
+  "name": "nest-egg-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Nest Egg three-tab student concept demo. Static HTML, CSS, and JavaScript.",
+  "scripts": { "test": "node --test tests/model.test.js" }
+}
