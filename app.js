@@ -1,5 +1,5 @@
-import { createDemo, summary, moneyToCents, validateDraft, updatePlan, recordSavings, undoSavings, parseYouTubeUrl, isValidPayday, savingsLedger } from './model.js?v=1.1';
-import { YOUTUBE_URL, YOUTUBE_TITLE, DEMO_AS_OF, LAST_PAYDAY, NEXT_PAYDAY } from './config.js?v=1.1';
+import { createDemo, summary, moneyToCents, validateDraft, updatePlan, recordSavings, undoSavings, parseYouTubeUrl, isValidPayday, savingsLedger, compareSavings } from './model.js?v=1.2';
+import { YOUTUBE_URL, YOUTUBE_TITLE, DEMO_AS_OF, LAST_PAYDAY, NEXT_PAYDAY } from './config.js?v=1.2';
 
 const $ = id => document.getElementById(id);
 const all = selector => [...document.querySelectorAll(selector)];
@@ -123,19 +123,23 @@ $('payday-date').addEventListener('change',() => {
 });
 
 function renderSavingsHistory() {
-  const history = state.savingsHistory ?? [];
-  const total = history.reduce((sum,entry) => sum + entry.amountCents,0);
-  const showHistory = history.length > 0 && total === state.startingCents;
+  const ledger=savingsLedger(state);
+  const history=ledger.rows.filter(row=>row.isPayment);
+  const showHistory=history.length>0;
   $('savings-history').hidden = !showHistory;
   $('goal-history-note').hidden = !showHistory;
   if (!showHistory) return;
-  let cumulative = 0;
-  const bars = history.map(entry => {
-    cumulative += entry.amountCents;
+  const max=Math.max(ledger.targetCents,...history.map(entry=>entry.amountCents));
+  $('history-bars').style.setProperty('--payment-count',String(history.length));
+  $('history-target-line').style.bottom=`${38+ledger.targetCents/max*120}px`;
+  const bars = history.map((entry,index) => {
     const li = document.createElement('li');
-    const value = document.createElement('span'); value.className='history-value'; value.textContent=money(cumulative);
-    const bar = document.createElement('span'); bar.className='history-bar'; bar.style.height=`${cumulative / total * 120}px`; bar.setAttribute('aria-hidden','true');
-    const month = document.createElement('span'); month.className='history-month'; month.textContent=entry.month;
+    li.className=`payment-${entry.comparison.status}`;
+    li.setAttribute('aria-label',`${entry.label}: ${money(entry.amountCents)}, ${comparisonText(entry.comparison)}`);
+    const height=entry.amountCents/max*120;
+    const value = document.createElement('span'); value.className='history-value'; value.textContent=money(entry.amountCents);value.style.bottom=`${34+height}px`;
+    const bar = document.createElement('span'); bar.className='history-bar'; bar.style.height=`${height}px`; bar.setAttribute('aria-hidden','true');
+    const month = document.createElement('span'); month.className='history-month'; month.textContent=`#${index+1}`;
     li.append(value,bar,month); return li;
   });
   $('history-bars').replaceChildren(...bars);
@@ -227,10 +231,10 @@ form.addEventListener('submit',event => {
     formFields[first].focus();
     return;
   }
-  const historyAdjusted=savingsLedger(state).months>0 && result.values.startingCents!==state.startingCents;
+  const historyAdjusted=savingsLedger(state).hasHistory && result.values.startingCents!==state.startingCents;
   state = updatePlan(state,result.values);
   populateForm(); render(); setError('record-error');
-  notify(historyAdjusted?'Plan updated. Adjusted starting balance shown; Reset demo restores the monthly history.':'Your plan is updated. Small steps, your pace.');
+  notify(historyAdjusted?'Plan updated. Adjusted starting balance shown; Reset demo restores the payment history.':'Your plan is updated. Small steps, your pace.');
 });
 
 $('plan-contribution').addEventListener('click',() => {
@@ -272,7 +276,7 @@ $('record-form').addEventListener('submit',event => {
   }
 });
 $('undo-savings').addEventListener('click',() => { state = undoSavings(state); render(); setError('record-error'); notify('Last check-in undone. Your previous balance is restored.'); if (!state.entries.length) $('saved-amount').focus(); });
-$('reset-demo').addEventListener('click',() => { state=createDemo(); payday=NEXT_PAYDAY; populateForm();render();renderPayday();setError('lesson-error');setError('record-error');setError('payday-error');$('lesson-amount').removeAttribute('aria-invalid');$('saved-amount').removeAttribute('aria-invalid');$('payday-date').removeAttribute('aria-invalid');notify('Alex’s $700 savings and December 4 payday are restored.'); });
+$('reset-demo').addEventListener('click',() => { state=createDemo(); payday=NEXT_PAYDAY; populateForm();render();renderPayday();setError('lesson-error');setError('record-error');setError('payday-error');$('lesson-amount').removeAttribute('aria-invalid');$('saved-amount').removeAttribute('aria-invalid');$('payday-date').removeAttribute('aria-invalid');notify('Alex’s $475 savings and December 4 payday are restored.'); });
 
 function mountLessonVideo() {
   if (!video) return;
@@ -300,16 +304,31 @@ all('dialog').forEach(dialog=>dialog.addEventListener('click',event=>{
 }));
 function renderSavingsLog() {
   const ledger=savingsLedger(state);
-  const intact=ledger.averageMonthlyCents!==null;
-  $('monthly-average').textContent=intact?`${money(ledger.averageMonthlyCents)}/month`:'Custom starting balance';
-  $('average-context').textContent=intact?'Average saved · May–Nov 2026':'Monthly average unavailable';
-  $('log-average').textContent=intact?`${money(ledger.averageMonthlyCents)}/month across ${ledger.months} months`:'Not available for a custom starting balance';
-  $('savings-log-dialog').querySelector('.log-footnote').textContent=intact?'Historical average = $700 ÷ 7 months (May–November 2026). New check-ins are separate demo entries. Changes reset on reload.':'An adjusted starting balance has no recorded monthly history, so no monthly average is shown. New check-ins remain separate demo entries. Changes reset on reload.';
+  const hasAverage=ledger.averagePaymentCents!==null;
+  const comparison=hasAverage?compareSavings(ledger.averagePaymentCents):null;
+  $('payment-average').textContent=hasAverage?`${money(ledger.averagePaymentCents)}/payment`:'No payment average';
+  $('average-context').textContent=hasAverage?`Average of ${ledger.paymentCount} recorded payments`:'Record a payment to see an average';
+  $('log-average').textContent=hasAverage?`${money(ledger.averagePaymentCents)} per payment`:'Not available';
+  for(const id of ['payment-average','log-average','history-average'])$(id).className=comparison?`comparison-${comparison.status}`:'';
+  for(const id of ['average-comparison','log-average-comparison','history-average-comparison']) {
+    $(id).textContent=comparison?`${comparisonText(comparison)} · $75 target`:'Adjusted opening balance excluded';
+    $(id).className=comparison?`average-comparison comparison-${comparison.status}`:'average-comparison';
+  }
+  $('history-average').textContent=hasAverage?money(ledger.averagePaymentCents):'—';
+  $('history-payment-count').textContent=`${ledger.paymentCount} recorded ${ledger.paymentCount===1?'payment':'payments'}`;
+  $('savings-log-dialog').querySelector('.log-footnote').textContent='Average = total recorded payments ÷ payment count. The $75 target is fixed for this example. Adjusted opening balances are excluded. New check-ins update the average; changes reset on reload.';
   $('savings-log-rows').replaceChildren(...ledger.rows.map(entry=>{
     const tr=document.createElement('tr');
-    [entry.label,money(entry.amountCents),money(entry.totalCents)].forEach((value,i)=>{const cell=document.createElement(i?'td':'th');if(!i)cell.scope='row';cell.textContent=value;tr.append(cell);});
+    const label=document.createElement('th');label.scope='row';label.textContent=entry.label;
+    const amount=document.createElement('td');amount.textContent=money(entry.amountCents);
+    if(entry.comparison){amount.className=`comparison-${entry.comparison.status}`;const status=document.createElement('small');status.textContent=comparisonText(entry.comparison);amount.append(status);}
+    const total=document.createElement('td');total.textContent=money(entry.totalCents);
+    tr.append(label,amount,total);
     return tr;
   }));
+}
+function comparisonText(comparison) {
+  return comparison.status==='at'?'At target':`${money(Math.abs(comparison.differenceCents))} ${comparison.status} target`;
 }
 if (video) {
   $('video-placeholder').hidden = true;

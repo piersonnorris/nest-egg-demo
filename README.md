@@ -2,15 +2,15 @@
 
 **Your first paycheck. Your first plan.** A three-tab interactive mock website for a Principles of Management / Shark Tank class concept.
 
-Current version: **1.1**. See [version history](CHANGELOG.md), [GitHub releases](https://github.com/piersonnorris/nest-egg-demo/releases), and [review decisions](docs/REVIEW-v1.1.md). Tag `v1.0` preserves the pre-redesign baseline.
+Current version: **1.2**. See [version history](CHANGELOG.md), [GitHub releases](https://github.com/piersonnorris/nest-egg-demo/releases), and [review decisions](docs/REVIEW-v1.1.md). Earlier tags preserve the previous examples.
 
 ## Experience
 
-- **My Plan**: an adjustable paycheck/goal calculator, with a $1,200 apartment-deposit example, a historical monthly average, and a book-icon savings log. Future contributions are separate from recorded savings.
+- **My Plan**: an adjustable paycheck/goal calculator, with a $1,200 apartment-deposit example, a per-payment average compared with a $75 target, and a book-icon savings log. Future contributions are separate from recorded savings.
 - **Start Here**: the embedded “Do This EVERY Time You Get Paid (Paycheck Routine)” video, an editable next-payday example, practical starting steps, and a short “pay yourself first” lesson.
-- **My Progress**: a seven-month savings history, shared goal state, learning/planning checkpoints, manual savings check-ins, and undo.
+- **My Progress**: individual savings payments with a $75 target line, shared goal state, learning/planning checkpoints, manual savings check-ins, and undo.
 
-The classroom timeline is fixed as of **December 1, 2026**: November 20 is marked paid and December 4 is the next payday. Alex saved $100 in each month from May through November, giving her a $700 starting balance and a $100/month historical average. Her $1,200 goal has $500 remaining: seven future contributions at $75, with the final contribution reduced to $50. New check-ins add to the log without changing the historical average. Editing the starting balance hides the original history/average and shows an adjusted opening balance instead.
+The classroom timeline is fixed as of **December 1, 2026**: November 20 is marked paid and December 4 is the next payday. Alex's five illustrative saved payments are **$75, $75, $125, $50, and $150**, totaling **$475** and averaging **$95/payment**, or **$20 above the $75 target**. Above-target payments are green, below-target payments red, and at-target payments neutral teal; text labels explain each comparison. These are payments, not monthly averages. No individual payment dates are asserted. Her $1,200 goal has $725 remaining: ten future contributions at $75, with the final contribution reduced to $50. Recorded check-ins update the payment average; planned contributions do not. Edited opening balances are excluded from the average and comparison. Reset restores the five original payments.
 
 Every tab reads the same in-memory demo state. Planned contributions never count as savings. Reloading or choosing **Reset demo** restores the sample; nothing is sent to a backend or stored persistently.
 

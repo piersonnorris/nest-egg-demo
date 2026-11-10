@@ -2,6 +2,16 @@
 
 This history names the classroom website releases. Earlier development commits remain in Git. Release dates are publication dates; the fictional presentation timeline stays December 1, 2026.
 
+## [1.2] — 2026-11-10
+
+- Replaced the original seven monthly entries with the requested five saved payments: $75, $75, $125, $50, and $150.
+- Updated all tabs to $475 saved, $725 remaining toward $1,200, and ten future contributions at $75 (final $50).
+- Replaced the historical monthly average with a $95 per-payment average, $20 above the fixed $75 target.
+- Added green above-target, red below-target, and neutral at-target comparisons, with text labels and exact differences in the log.
+- Changed the chart from cumulative totals to individual payment amounts with a dashed $75 target line and a color legend.
+- New recorded check-ins update the average and chart; planned amounts and adjusted opening balances do not count as payments. Undo/reset restore the correct values.
+- Preserved the December 1 / November 20 / December 4 timeline and thumbnail-free video cover. Previous release examples remain available under their tags.
+
 ## [1.1] — 2026-11-10
 
 ### Changed
@@ -41,5 +51,6 @@ Named baseline at commit `c65d3724830155bf8611b32a303152efe9ce4bd6`, preserving 
 - Requested YouTube video embedded with its original thumbnail.
 - Manual savings check-ins, undo, reset, input validation, and mobile layouts.
 
+[1.2]: https://github.com/piersonnorris/nest-egg-demo/releases/tag/v1.2
 [1.1]: https://github.com/piersonnorris/nest-egg-demo/releases/tag/v1.1
 [1.0]: https://github.com/piersonnorris/nest-egg-demo/releases/tag/v1.0

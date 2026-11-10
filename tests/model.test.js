@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createDemo, summary, moneyToCents, validateDraft, recordSavings, undoSavings, parseYouTubeUrl, isValidPayday, savingsLedger } from '../model.js';
+import { createDemo, summary, moneyToCents, validateDraft, recordSavings, undoSavings, parseYouTubeUrl, isValidPayday, savingsLedger, compareSavings } from '../model.js';
 import { DEMO_AS_OF, LAST_PAYDAY, NEXT_PAYDAY, YOUTUBE_URL } from '../config.js';
 
 test('the deck example takes 16 contributions, without a promised calendar date',() => {
@@ -9,46 +9,56 @@ test('the deck example takes 16 contributions, without a promised calendar date'
   assert.equal(summary({...fromZero,contributionCents:8000}).paychecks,15);
   assert.equal(summary({...fromZero,contributionCents:7000}).paychecks,18);
 });
-test('seven monthly deposits produce a $700 starting balance and seven remaining paychecks',() => {
+test('the five varied payments total $475 with ten remaining paychecks',() => {
   const demo=createDemo(), s=summary(demo);
-  assert.equal(demo.savingsHistory.length,7);
-  assert.ok(demo.savingsHistory.every(entry=>entry.amountCents===10000));
-  assert.equal(s.saved,70000);
-  assert.equal(s.remaining,50000);
-  assert.equal(s.paychecks,7);
-  assert.equal(summary({...demo,contributionCents:10000}).paychecks,5);
+  assert.deepEqual(demo.savingsHistory.map(entry=>entry.amountCents),[7500,7500,12500,5000,15000]);
+  assert.equal(s.saved,47500);
+  assert.equal(s.remaining,72500);
+  assert.equal(s.paychecks,10);
+  assert.equal(summary({...demo,contributionCents:10000}).paychecks,8);
   assert.deepEqual(undoSavings(demo),demo);
 });
 test('planning a step does not move savings; a check-in is undoable',() => {
   const planned={...createDemo(),planned:true};
-  assert.equal(summary(planned).saved,70000);
+  assert.equal(summary(planned).saved,47500);
   const saved=recordSavings(planned,7500);
-  assert.equal(summary(saved).saved,77500);
-  assert.equal(summary(saved).paychecks,6);
+  assert.equal(summary(saved).saved,55000);
+  assert.equal(summary(saved).paychecks,9);
   assert.equal(saved.planned,false);
   assert.deepEqual(undoSavings(saved),planned);
 });
 
-test('the log separates the historical monthly average from new check-ins',()=>{
+test('the payment average and running total update with recorded check-ins and undo',()=>{
   const recorded=recordSavings(createDemo(),7500);
   const ledger=savingsLedger(recorded);
-  assert.equal(ledger.averageMonthlyCents,10000);
-  assert.equal(ledger.months,7);
-  assert.equal(ledger.rows.length,8);
-  assert.equal(ledger.rows[6].totalCents,70000);
-  assert.equal(ledger.rows[7].amountCents,7500);
-  assert.equal(ledger.rows[7].totalCents,summary(recorded).saved);
-  assert.equal(savingsLedger(undoSavings(recorded)).rows.length,7);
+  assert.equal(ledger.averagePaymentCents,9167);
+  assert.equal(ledger.paymentCount,6);
+  assert.equal(ledger.rows.length,6);
+  assert.equal(ledger.rows[4].totalCents,47500);
+  assert.equal(ledger.rows[5].amountCents,7500);
+  assert.equal(ledger.rows[5].totalCents,summary(recorded).saved);
+  assert.equal(savingsLedger(undoSavings(recorded)).averagePaymentCents,9500);
+  assert.equal(savingsLedger(recordSavings(createDemo(),5000)).averagePaymentCents,8750);
 });
 
-test('a custom opening balance never inherits a fictional monthly average',()=>{
+test('a custom opening balance is excluded from the payment average and comparisons',()=>{
   const custom={...createDemo(),startingCents:81234};
   const ledger=savingsLedger(recordSavings(custom,1000));
-  assert.equal(ledger.averageMonthlyCents,null);
-  assert.equal(ledger.months,0);
+  assert.equal(savingsLedger(custom).averagePaymentCents,null);
+  assert.equal(ledger.averagePaymentCents,1000);
+  assert.equal(ledger.paymentCount,1);
   assert.equal(ledger.rows.length,2);
   assert.equal(ledger.rows[0].amountCents,81234);
+  assert.equal(ledger.rows[0].comparison,null);
   assert.equal(ledger.rows.at(-1).totalCents,82234);
+});
+
+test('the $95 average exceeds the $75 target and each payment gets the right comparison',()=>{
+  const ledger=savingsLedger(createDemo());
+  assert.equal(ledger.averagePaymentCents,9500);
+  assert.deepEqual(compareSavings(9500),{differenceCents:2000,status:'above'});
+  assert.deepEqual(ledger.rows.map(row=>row.comparison.status),['at','at','above','below','above']);
+  assert.deepEqual(ledger.rows.map(row=>row.comparison.differenceCents),[0,0,5000,-2500,7500]);
 });
 test('the last contribution uses only the remaining amount and completes the goal',() => {
   const state={...createDemo(),startingCents:119500};

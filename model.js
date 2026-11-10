@@ -1,7 +1,8 @@
 export const MAX_CENTS = 100_000_000;
+export const SAVINGS_TARGET_CENTS = 7500;
 
 export function createDemo() {
-  const savingsHistory = ['May','Jun','Jul','Aug','Sep','Oct','Nov'].map(month => ({ month, amountCents: 10000 }));
+  const savingsHistory = [7500,7500,12500,5000,15000].map((amountCents,index) => ({ label:`Payment ${index+1}`, amountCents }));
   return { goalName: 'First place fund', targetCents: 120000,
     startingCents: savingsHistory.reduce((sum, entry) => sum + entry.amountCents, 0), savingsHistory,
     paycheckCents: 30000, contributionCents: 7500, lessonExplored: false, planned: false, entries: [] };
@@ -67,14 +68,22 @@ export function savingsLedger(state) {
   const history=state.savingsHistory??[];
   const historyTotal=history.reduce((sum,entry)=>sum+entry.amountCents,0);
   const hasHistory=history.length>0 && historyTotal===state.startingCents;
-  const rows=hasHistory?history.map(entry=>({label:`${entry.month} 2026`,amountCents:entry.amountCents})):[{label:'Starting balance (adjusted)',amountCents:state.startingCents}];
-  state.entries.forEach((entry,index)=>rows.push({label:`Demo check-in ${index+1}`,amountCents:entry.amountCents}));
+  const rows=hasHistory?history.map(entry=>({label:entry.label,amountCents:entry.amountCents,isPayment:true})):[{label:'Starting balance (adjusted)',amountCents:state.startingCents,isPayment:false}];
+  state.entries.forEach((entry,index)=>rows.push({label:`New check-in ${index+1}`,amountCents:entry.amountCents,isPayment:true}));
+  const payments=rows.filter(row=>row.isPayment);
   let total=0;
   return {
-    averageMonthlyCents:hasHistory?Math.round(historyTotal/history.length):null,
-    months:hasHistory?history.length:0,
-    rows:rows.map(row=>({...row,totalCents:total+=row.amountCents}))
+    hasHistory,
+    averagePaymentCents:payments.length?Math.round(payments.reduce((sum,row)=>sum+row.amountCents,0)/payments.length):null,
+    paymentCount:payments.length,
+    targetCents:SAVINGS_TARGET_CENTS,
+    rows:rows.map(row=>({...row,totalCents:total+=row.amountCents,comparison:row.isPayment?compareSavings(row.amountCents):null}))
   };
+}
+
+export function compareSavings(amountCents) {
+  const differenceCents=amountCents-SAVINGS_TARGET_CENTS;
+  return {differenceCents,status:differenceCents>0?'above':differenceCents<0?'below':'at'};
 }
 
 export function parseYouTubeUrl(value) {
