@@ -12,6 +12,10 @@ Every tab reads the same in-memory demo state. Planned contributions never count
 
 Alex is a fictional 19-year-old Elon University student. Select the user avatar to open the student profile: the illustrative $18.99/month standard price is crossed out beside a $0/month Student membership. Student verification is explicitly a demo; there is no checkout or real university verification. The profile supports Escape, outside-click dismissal, and keyboard focus.
 
+## Visual direction
+
+The interface adapts the member-dashboard patterns of the SoFi reference: a teal dashboard surface, white rounded cards, restrained navigation, compact quick actions, a warm off-white page background, and purple student-membership accents. Nest Egg keeps its own original brand and fictional student experience. The public source contains no real account balances, personal account details, authenticated screenshots, proprietary font files, or SoFi product offers. `theme.css` holds this visual layer; the planner behavior remains in `app.js` and `model.js`.
+
 ## Add the YouTube video
 
 Edit **`config.js`**:

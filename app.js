@@ -67,23 +67,30 @@ if (!['plan','start','progress'].includes(location.hash.slice(1))) history.repla
 showTab(location.hash.slice(1));
 
 const profileRoot = $('profile-root');
+const profileButtons = all('[data-profile-toggle]');
+let profileReturnTarget = $('profile-trigger');
 function closeProfile(restoreFocus = false) {
   $('profile-panel').hidden = true;
-  $('profile-trigger').setAttribute('aria-expanded','false');
-  if (restoreFocus) $('profile-trigger').focus();
+  profileButtons.forEach(button => button.setAttribute('aria-expanded','false'));
+  if (restoreFocus) profileReturnTarget.focus();
 }
-$('profile-trigger').addEventListener('click',() => {
+profileButtons.forEach(button => button.addEventListener('click',() => {
   const opening = $('profile-panel').hidden;
   $('profile-panel').hidden = !opening;
-  $('profile-trigger').setAttribute('aria-expanded',String(opening));
-});
+  profileButtons.forEach(trigger => trigger.setAttribute('aria-expanded',String(opening)));
+  if (opening) {
+    profileReturnTarget = button;
+    if (button !== $('profile-trigger')) $('profile-close').focus({preventScroll:true});
+  }
+}));
 $('profile-close').addEventListener('click',() => closeProfile(true));
 $('profile-back').addEventListener('click',() => { closeProfile(); navigate('plan'); });
-document.addEventListener('click',event => { if (!$('profile-panel').hidden && !profileRoot.contains(event.target)) closeProfile(); });
+document.addEventListener('click',event => { if (!$('profile-panel').hidden && !profileRoot.contains(event.target) && !profileButtons.some(button => button.contains(event.target))) closeProfile(); });
 document.addEventListener('keydown',event => {
   if (event.key === 'Escape' && !$('profile-panel').hidden) { event.preventDefault(); closeProfile(true); }
 });
-profileRoot.addEventListener('focusout',event => { if (!profileRoot.contains(event.relatedTarget)) closeProfile(); });
+profileRoot.addEventListener('focusout',event => { if (!$('profile-panel').hidden && !profileRoot.contains(event.relatedTarget) && !profileButtons.some(button => button.contains(event.relatedTarget))) closeProfile(); });
+$('quick-edit-plan').addEventListener('click',() => formFields.contribution.focus());
 
 function populateForm() {
   formFields.goalName.value = state.goalName;

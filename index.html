@@ -6,9 +6,10 @@
   <meta name="theme-color" content="#0b1f3a">
   <meta name="description" content="Your first paycheck. Your first plan. Explore the Nest Egg student concept: a small lesson, a personal goal, and one practical next step.">
   <title>Nest Egg — Your first paycheck. Your first plan.</title>
-  <link rel="icon" type="image/svg+xml" href="assets/nest-egg-mark.svg">
-  <link rel="stylesheet" href="styles.css">
-  <script type="module" src="app.js"></script>
+  <link rel="icon" type="image/svg+xml" href="assets/nest-egg-mark.svg?v=3">
+  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="theme.css?v=3">
+  <script type="module" src="app.js?v=3"></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -34,7 +35,7 @@
 
   <header class="site-header">
     <div class="header-inner">
-      <a href="#plan" class="brand" aria-label="Nest Egg — My Plan"><img src="assets/nest-egg-mark.svg" alt="" width="45" height="48"><span>Nest <span>Egg</span></span></a>
+      <a href="#plan" class="brand" aria-label="Nest Egg — My Plan"><img src="assets/nest-egg-mark.svg?v=3" alt="" width="45" height="48"><span>Nest <span>Egg</span></span></a>
       <nav class="tab-navigation" aria-label="Nest Egg">
         <div role="tablist" aria-label="Your Nest Egg">
           <a href="#plan" id="tab-plan" class="tab active" role="tab" aria-selected="true" aria-controls="plan"><svg class="icon"><use href="#i-grid"/></svg>My Plan</a>
@@ -44,7 +45,7 @@
       </nav>
       <div class="sample-profile" id="profile-root">
         <span class="demo-tag">Concept demo</span>
-        <button type="button" class="profile-trigger" id="profile-trigger" aria-label="Open Alex’s profile, Elon student" aria-expanded="false" aria-controls="profile-panel"><span class="profile-avatar" aria-hidden="true">A</span><span class="profile-label"><strong>Alex</strong><span>Elon student</span></span><svg class="icon profile-chevron" aria-hidden="true"><use href="#i-chevron"/></svg></button>
+        <button type="button" class="profile-trigger" id="profile-trigger" data-profile-toggle aria-label="Open Alex’s profile, Elon student" aria-expanded="false" aria-controls="profile-panel"><span class="profile-avatar" aria-hidden="true">A</span><span class="profile-label"><strong>Alex</strong><span>Elon student</span></span><svg class="icon profile-chevron" aria-hidden="true"><use href="#i-chevron"/></svg></button>
         <section class="profile-panel" id="profile-panel" aria-labelledby="profile-title" hidden>
           <div class="profile-panel-header"><button type="button" class="profile-close" id="profile-close" aria-label="Close profile"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button><span class="profile-avatar profile-avatar-large" aria-hidden="true">A</span><div><h2 id="profile-title">Hey, Alex.</h2><p>19 · Elon University student</p></div></div>
           <div class="profile-panel-body">
@@ -66,10 +67,12 @@
     <noscript><div class="noscript">This is an interactive class concept. Enable JavaScript to try the planner. The examples below are still available to read.</div><style>form,.js-action{display:none!important}.tab-navigation{display:none}</style></noscript>
 
     <section id="plan" class="tab-panel" role="tabpanel" aria-labelledby="tab-plan">
-      <div class="page-intro">
-        <div><p class="eyebrow"><span class="small-line"></span> A LITTLE CLARITY GOES A LONG WAY</p><h1 tabindex="-1">Your first paycheck.<br>Your first <span class="accent-word">plan.</span></h1><p class="intro-copy">An Elon student’s first paycheck. One goal to make it count.</p></div>
-        <div class="intro-aside"><span class="round-icon"><svg class="icon"><use href="#i-spark"/></svg></span><p>Big beginnings.<br><strong>Small, doable steps.</strong></p></div>
-      </div>
+      <div class="dashboard-band">
+        <div class="dashboard-utility"><span class="campus-chip"><svg class="icon"><use href="#i-campus"/></svg>Elon University student</span><button type="button" class="student-ribbon" data-profile-toggle aria-controls="profile-panel" aria-expanded="false"><svg class="icon"><use href="#i-spark"/></svg>Nest Egg Student <span>·</span> $0/month <svg class="icon ribbon-chevron"><use href="#i-arrow"/></svg></button></div>
+        <div class="page-intro dashboard-intro">
+          <div><h1 tabindex="-1">Welcome back, Alex.</h1><p class="intro-copy">Your first paycheck. Your first plan.</p></div>
+          <div class="quick-actions" aria-label="Quick actions"><button type="button" class="quick-action" id="quick-edit-plan"><span class="quick-icon"><svg class="icon"><use href="#i-grid"/></svg></span><span>Adjust plan</span></button><a class="quick-action" href="#start" data-navigate="start"><span class="quick-icon"><svg class="icon"><use href="#i-book"/></svg></span><span>Learn</span></a><a class="quick-action" href="#progress" data-navigate="progress"><span class="quick-icon"><svg class="icon"><use href="#i-plus"/></svg></span><span>Check in</span></a></div>
+        </div>
 
       <div class="plan-grid">
         <article class="goal-card card">
@@ -88,7 +91,7 @@
         </article>
 
         <article class="contribution-card card">
-          <div class="card-heading"><div><p class="eyebrow">YOUR PAYCHECK, YOUR PACE</p><h2>Make it yours.</h2></div><span class="round-icon small"><svg class="icon"><use href="#i-plus"/></svg></span></div>
+          <div class="card-heading"><div><p class="eyebrow">YOUR PAYCHECK, YOUR PACE</p><h2>Your next paycheck</h2></div><span class="round-icon small"><svg class="icon"><use href="#i-plus"/></svg></span></div>
           <form id="plan-form" novalidate>
             <label class="field-label" for="contribution">Set aside each paycheck</label>
             <div class="contribution-entry"><span aria-hidden="true">$</span><input id="contribution" name="contribution" type="number" inputmode="decimal" min="0" step="0.01" value="75" aria-describedby="contribution-help plan-error"><span class="rate-pill" id="allocation-percent">25% of pay</span></div>
@@ -107,20 +110,25 @@
           </form>
         </article>
       </div>
-      <a class="lesson-ribbon" href="#start" data-navigate="start"><span class="round-icon"><svg class="icon"><use href="#i-book"/></svg></span><span><span class="eyebrow">A SMALL LESSON. A USEFUL NEXT STEP.</span><strong>Meet your future self halfway.</strong><span class="ribbon-description">Learn what “pay yourself first” can look like.</span></span><span class="ribbon-arrow"><svg class="icon"><use href="#i-arrow"/></svg></span></a>
+      </div>
+      <section class="next-steps-section" aria-labelledby="next-steps-title"><div class="section-heading"><h2 id="next-steps-title">Tools for your next step</h2><a class="text-link" href="#start" data-navigate="start">Explore lessons <svg class="icon"><use href="#i-arrow"/></svg></a></div><div class="insight-grid">
+        <a class="insight-card" href="#start" data-navigate="start"><span class="insight-icon learn-icon"><svg class="icon"><use href="#i-book"/></svg></span><span class="insight-copy"><span class="insight-kicker">LEARN</span><strong>Pay yourself first</strong><span>A small lesson for your next paycheck.</span></span><svg class="icon insight-arrow"><use href="#i-arrow"/></svg></a>
+        <a class="insight-card" href="#progress" data-navigate="progress"><span class="insight-icon progress-icon"><svg class="icon"><use href="#i-chart"/></svg></span><span class="insight-copy"><span class="insight-kicker">BUILD A HABIT</span><strong>One paycheck. One check-in.</strong><span>See your progress and record a small win.</span></span><svg class="icon insight-arrow"><use href="#i-arrow"/></svg></a>
+        <button class="insight-card" type="button" data-profile-toggle aria-controls="profile-panel" aria-expanded="false"><span class="insight-icon student-icon"><svg class="icon"><use href="#i-campus"/></svg></span><span class="insight-copy"><span class="insight-kicker">STUDENT BENEFITS</span><strong>A head start, included.</strong><span>Explore your free student membership.</span></span><svg class="icon insight-arrow"><use href="#i-arrow"/></svg></button>
+      </div></section>
     </section>
 
     <section id="start" class="tab-panel" role="tabpanel" aria-labelledby="tab-start">
-      <div class="page-intro"><div><p class="eyebrow"><span class="small-line"></span> THE FIRST STEP DOESN’T HAVE TO BE BIG</p><h1 tabindex="-1">A little confidence.<br>A new <span class="accent-word">beginning.</span></h1><p class="intro-copy">From finding a first role to planning your first paycheck.</p></div><div class="intro-aside"><span class="chapter-number">01</span><p>Start where you are.<br><strong>Build from there.</strong></p></div></div>
+      <div class="page-intro"><div><p class="eyebrow"><span class="small-line"></span> LEARN &amp; GROW</p><h1 tabindex="-1">Let’s get you started.</h1><p class="intro-copy">From finding a first role to planning your first paycheck.</p></div><div class="intro-aside"><span class="chapter-number">01</span><p>Start where you are.<br><strong>Build from there.</strong></p></div></div>
       <div class="learn-grid">
-        <article class="video-card" id="video-card"><div class="video-topline"><span class="video-eyebrow">THE FIRST CHAPTER</span><span class="video-status" id="video-status">VIDEO TO BE ADDED</span></div><div class="video-placeholder" id="video-placeholder"><div class="video-emblem" aria-hidden="true"><svg class="icon"><use href="#i-video"/></svg><span class="emblem-spark">✦</span></div><h2>Before the paycheck,<br>there’s the <em>first step.</em></h2><p>A practical introduction to finding your first job.<br>The YouTube lesson will go here.</p><span class="coming-label">A little guidance is on its way.</span></div><div id="configured-video" hidden><div id="video-embed"></div><button type="button" id="load-video" class="button button-video">Load the YouTube video <svg class="icon"><use href="#i-video"/></svg></button><a id="youtube-link" class="video-link" target="_blank" rel="noopener noreferrer">Watch on YouTube <svg class="icon"><use href="#i-external"/></svg></a></div><div class="video-bottomline"><img src="assets/nest-egg-mark.svg" alt="" width="24" height="28"><span>Start small. Take the next step.</span><span>nest egg / learn</span></div></article>
+        <article class="video-card" id="video-card"><div class="video-topline"><span class="video-eyebrow">THE FIRST CHAPTER</span><span class="video-status" id="video-status">VIDEO TO BE ADDED</span></div><div class="video-placeholder" id="video-placeholder"><div class="video-emblem" aria-hidden="true"><svg class="icon"><use href="#i-video"/></svg><span class="emblem-spark">✦</span></div><h2>Before the paycheck,<br>there’s the <em>first step.</em></h2><p>A practical introduction to finding your first job.<br>The YouTube lesson will go here.</p><span class="coming-label">A little guidance is on its way.</span></div><div id="configured-video" hidden><div id="video-embed"></div><button type="button" id="load-video" class="button button-video">Load the YouTube video <svg class="icon"><use href="#i-video"/></svg></button><a id="youtube-link" class="video-link" target="_blank" rel="noopener noreferrer">Watch on YouTube <svg class="icon"><use href="#i-external"/></svg></a></div><div class="video-bottomline"><img src="assets/nest-egg-mark.svg?v=3" alt="" width="24" height="28"><span>Start small. Take the next step.</span><span>nest egg / learn</span></div></article>
         <article class="steps-card card"><p class="eyebrow">YOUR OPPORTUNITY STARTS HERE</p><h2>A first role.<br>A few practical steps.</h2><p class="muted steps-intro">You don’t need it all figured out to begin.</p><ol class="career-steps"><li><span>01</span><div><h3>Put your story on paper.</h3><p>Draft a simple résumé with your experience, skills, and projects.</p></div></li><li><span>02</span><div><h3>Choose one opportunity.</h3><p>Look for a role on campus or nearby. One opportunity is a good start.</p></div></li><li><span>03</span><div><h3>Practice one good example.</h3><p>Prepare a story about solving a problem or helping a team.</p></div></li><li><span>04</span><div><h3>Give that paycheck a plan.</h3><p>Choose a goal before the money arrives.</p></div></li></ol><p class="small-note">Suggested starting points, separate from the future video.</p></article>
       </div>
       <article class="bridge-lesson card"><div class="lesson-copy"><span class="lesson-label"><svg class="icon"><use href="#i-spark"/></svg> THE MONEY PART</span><h2>Pay your future self first.</h2><p>Choose a manageable amount for your goal before deciding how to use the rest. Alex’s example starts with $75 from a $300 paycheck. Your amount can be different.</p><details class="mini-disclosure"><summary>Why start small?</summary><p>A plan you can follow is more useful than a big number you can’t. Leave room for essentials, and adjust as life changes.</p></details></div><form id="lesson-form" class="lesson-form" novalidate><label for="lesson-amount">What feels doable each paycheck?</label><div class="lesson-input-row"><span aria-hidden="true">$</span><input id="lesson-amount" type="number" inputmode="decimal" min="0" step="0.01" value="75" aria-describedby="lesson-error"></div><p id="lesson-error" class="form-error" role="alert" hidden></p><button class="button button-primary" type="submit">Use this in my plan <svg class="icon"><use href="#i-arrow"/></svg></button><span class="small-note">Marks this lesson explored. No money moves.</span></form></article>
     </section>
 
     <section id="progress" class="tab-panel" role="tabpanel" aria-labelledby="tab-progress">
-      <div class="page-intro"><div><p class="eyebrow"><span class="small-line"></span> EVERY SMALL STEP COUNTS</p><h1 tabindex="-1">A little closer.<br>A little more <span class="accent-word">you.</span></h1><p class="intro-copy">Your goal, your progress, and a clear next step.</p></div><div class="intro-aside"><span class="round-icon"><svg class="icon"><use href="#i-chart"/></svg></span><p>Progress over pressure.<br><strong>Always.</strong></p></div></div>
+      <div class="page-intro"><div><p class="eyebrow"><span class="small-line"></span> EVERY SMALL STEP COUNTS</p><h1 tabindex="-1">Your progress, at a glance.</h1><p class="intro-copy">Your goal, your savings, and a clear next step.</p></div><div class="intro-aside"><span class="round-icon"><svg class="icon"><use href="#i-chart"/></svg></span><p>Progress over pressure.<br><strong>Always.</strong></p></div></div>
       <div class="progress-grid">
         <article class="progress-card"><div class="card-topline"><p class="eyebrow">YOUR BIGGER PICTURE</p><span class="outline-pill">MANUAL DEMO</span></div><div class="progress-overview"><div class="progress-ring" id="progress-ring" role="progressbar" aria-label="Savings goal progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div><span class="ring-percentage" data-bind="percent">0%</span><span>of your goal</span></div></div><div class="progress-totals"><h2 data-bind="goalName">First place fund</h2><p><strong data-bind="saved">$0</strong><span> of <span data-bind="target">$1,200</span></span></p><span id="progress-outlook">16 small steps from here.</span></div></div><div class="progress-card-note"><svg class="icon"><use href="#i-lock"/></svg><span>Planned money isn’t saved money.<br>Only your manual check-ins move this bar.</span></div></article>
         <article class="milestones-card card"><p class="eyebrow">THE SMALL WINS</p><h2>Find your rhythm.</h2><ol class="milestones"><li class="done"><span class="milestone-dot"><svg class="icon"><use href="#i-check"/></svg></span><div><h3>A goal to work toward</h3><p>You’ve given your money a purpose.</p></div></li><li id="lesson-milestone"><span class="milestone-dot"><svg class="icon"><use href="#i-check"/></svg></span><div><h3>A lesson to build on</h3><p id="lesson-milestone-help">Explore “pay yourself first” in Start Here.</p></div></li><li id="plan-milestone"><span class="milestone-dot"><svg class="icon"><use href="#i-check"/></svg></span><div><h3>A next step you’ve planned</h3><p id="plan-milestone-help">Choose how much to set aside at your own bank.</p></div></li></ol><button type="button" id="progress-next" class="button button-secondary js-action">Explore your first lesson <svg class="icon"><use href="#i-arrow"/></svg></button></article>
