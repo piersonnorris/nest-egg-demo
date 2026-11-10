@@ -66,6 +66,25 @@ $('tab-plan').parentElement.addEventListener('keydown',event => {
 if (!['plan','start','progress'].includes(location.hash.slice(1))) history.replaceState(null,'','#plan');
 showTab(location.hash.slice(1));
 
+const profileRoot = $('profile-root');
+function closeProfile(restoreFocus = false) {
+  $('profile-panel').hidden = true;
+  $('profile-trigger').setAttribute('aria-expanded','false');
+  if (restoreFocus) $('profile-trigger').focus();
+}
+$('profile-trigger').addEventListener('click',() => {
+  const opening = $('profile-panel').hidden;
+  $('profile-panel').hidden = !opening;
+  $('profile-trigger').setAttribute('aria-expanded',String(opening));
+});
+$('profile-close').addEventListener('click',() => closeProfile(true));
+$('profile-back').addEventListener('click',() => { closeProfile(); navigate('plan'); });
+document.addEventListener('click',event => { if (!$('profile-panel').hidden && !profileRoot.contains(event.target)) closeProfile(); });
+document.addEventListener('keydown',event => {
+  if (event.key === 'Escape' && !$('profile-panel').hidden) { event.preventDefault(); closeProfile(true); }
+});
+profileRoot.addEventListener('focusout',event => { if (!profileRoot.contains(event.relatedTarget)) closeProfile(); });
+
 function populateForm() {
   formFields.goalName.value = state.goalName;
   formFields.target.value = asInput(state.targetCents);
@@ -111,7 +130,7 @@ function render() {
   const bindings = { goalName:state.goalName, target:money(state.targetCents), saved:money(s.saved), percent:percentText, paychecks:countText, 'contribution-summary':s.remaining === 0 ? 'A small plan. A real milestone.' : `At ${money(state.contributionCents)} per paycheck` };
   all('[data-bind]').forEach(el => { el.textContent = bindings[el.dataset.bind]; });
   document.querySelector('.goal-amount [data-bind="target"]').style.fontSize = state.targetCents >= 10000000 ? '36px' : '';
-  document.querySelector('.goal-title-row .muted').textContent = state.goalName === 'First place fund' ? 'An apartment deposit. A little independence.' : 'One goal. A little more possibility.';
+  document.querySelector('.goal-title-row .muted').textContent = state.goalName === 'First place fund' ? 'A place near campus. A little independence.' : 'One goal. A little more possibility.';
   $('plan-progress').setAttribute('aria-valuenow',String(s.percent.toFixed(2)));
   $('plan-progress').setAttribute('aria-valuetext',`${money(s.saved)} saved toward ${money(state.targetCents)}`);
   $('plan-progress').querySelector('.progress-fill').style.width = `${s.percent}%`;

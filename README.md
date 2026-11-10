@@ -10,6 +10,8 @@
 
 Every tab reads the same in-memory demo state. Planned contributions never count as savings. Reloading or choosing **Reset demo** restores the sample; nothing is sent to a backend or stored persistently.
 
+Alex is a fictional 19-year-old Elon University student. Select the user avatar to open the student profile: the illustrative $18.99/month standard price is crossed out beside a $0/month Student membership. Student verification is explicitly a demo; there is no checkout or real university verification. The profile supports Escape, outside-click dismissal, and keyboard focus.
+
 ## Add the YouTube video
 
 Edit **`config.js`**:
