@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createDemo, summary, moneyToCents, validateDraft, recordSavings, undoSavings, parseYouTubeUrl, isValidPayday } from '../model.js';
+import { createDemo, summary, moneyToCents, validateDraft, recordSavings, undoSavings, parseYouTubeUrl, isValidPayday, savingsLedger } from '../model.js';
 import { DEMO_AS_OF, LAST_PAYDAY, NEXT_PAYDAY, YOUTUBE_URL } from '../config.js';
 
 test('the deck example takes 16 contributions, without a promised calendar date',() => {
@@ -27,6 +27,28 @@ test('planning a step does not move savings; a check-in is undoable',() => {
   assert.equal(summary(saved).paychecks,6);
   assert.equal(saved.planned,false);
   assert.deepEqual(undoSavings(saved),planned);
+});
+
+test('the log separates the historical monthly average from new check-ins',()=>{
+  const recorded=recordSavings(createDemo(),7500);
+  const ledger=savingsLedger(recorded);
+  assert.equal(ledger.averageMonthlyCents,10000);
+  assert.equal(ledger.months,7);
+  assert.equal(ledger.rows.length,8);
+  assert.equal(ledger.rows[6].totalCents,70000);
+  assert.equal(ledger.rows[7].amountCents,7500);
+  assert.equal(ledger.rows[7].totalCents,summary(recorded).saved);
+  assert.equal(savingsLedger(undoSavings(recorded)).rows.length,7);
+});
+
+test('a custom opening balance never inherits a fictional monthly average',()=>{
+  const custom={...createDemo(),startingCents:81234};
+  const ledger=savingsLedger(recordSavings(custom,1000));
+  assert.equal(ledger.averageMonthlyCents,null);
+  assert.equal(ledger.months,0);
+  assert.equal(ledger.rows.length,2);
+  assert.equal(ledger.rows[0].amountCents,81234);
+  assert.equal(ledger.rows.at(-1).totalCents,82234);
 });
 test('the last contribution uses only the remaining amount and completes the goal',() => {
   const state={...createDemo(),startingCents:119500};

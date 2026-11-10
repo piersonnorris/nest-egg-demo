@@ -46,7 +46,7 @@ export function validateDraft(draft) {
 }
 
 export function updatePlan(state, values) {
-  const changed = ['goalName','targetCents','paycheckCents','contributionCents'].some(key => state[key] !== values[key]);
+  const changed = ['goalName','targetCents','startingCents','paycheckCents','contributionCents'].some(key => state[key] !== values[key]);
   return { ...state, ...values, planned: changed ? false : state.planned };
 }
 
@@ -61,6 +61,20 @@ export function recordSavings(state, amountCents) {
 export function undoSavings(state) {
   if (!state.entries.length) return state;
   return { ...state, planned: state.entries.at(-1).wasPlanned, entries: state.entries.slice(0,-1) };
+}
+
+export function savingsLedger(state) {
+  const history=state.savingsHistory??[];
+  const historyTotal=history.reduce((sum,entry)=>sum+entry.amountCents,0);
+  const hasHistory=history.length>0 && historyTotal===state.startingCents;
+  const rows=hasHistory?history.map(entry=>({label:`${entry.month} 2026`,amountCents:entry.amountCents})):[{label:'Starting balance (adjusted)',amountCents:state.startingCents}];
+  state.entries.forEach((entry,index)=>rows.push({label:`Demo check-in ${index+1}`,amountCents:entry.amountCents}));
+  let total=0;
+  return {
+    averageMonthlyCents:hasHistory?Math.round(historyTotal/history.length):null,
+    months:hasHistory?history.length:0,
+    rows:rows.map(row=>({...row,totalCents:total+=row.amountCents}))
+  };
 }
 
 export function parseYouTubeUrl(value) {

@@ -2,13 +2,15 @@
 
 **Your first paycheck. Your first plan.** A three-tab interactive mock website for a Principles of Management / Shark Tank class concept.
 
+Current version: **1.1**. See [version history](CHANGELOG.md), [GitHub releases](https://github.com/piersonnorris/nest-egg-demo/releases), and [review decisions](docs/REVIEW-v1.1.md). Tag `v1.0` preserves the pre-redesign baseline.
+
 ## Experience
 
-- **My Plan**: an adjustable paycheck/goal calculator, with a $1,200 apartment-deposit example.
+- **My Plan**: an adjustable paycheck/goal calculator, with a $1,200 apartment-deposit example, a historical monthly average, and a book-icon savings log. Future contributions are separate from recorded savings.
 - **Start Here**: the embedded “Do This EVERY Time You Get Paid (Paycheck Routine)” video, an editable next-payday example, practical starting steps, and a short “pay yourself first” lesson.
 - **My Progress**: a seven-month savings history, shared goal state, learning/planning checkpoints, manual savings check-ins, and undo.
 
-The classroom timeline is fixed as of **December 1, 2026**: November 20 is marked paid and December 4 is the next payday. Alex saved $100 in each month from May through November, giving her a $700 starting balance. Her $1,200 goal has $500 remaining: seven future contributions at $75, with the final contribution reduced to $50. Past monthly savings and future per-paycheck contributions are distinct.
+The classroom timeline is fixed as of **December 1, 2026**: November 20 is marked paid and December 4 is the next payday. Alex saved $100 in each month from May through November, giving her a $700 starting balance and a $100/month historical average. Her $1,200 goal has $500 remaining: seven future contributions at $75, with the final contribution reduced to $50. New check-ins add to the log without changing the historical average. Editing the starting balance hides the original history/average and shows an adjusted opening balance instead.
 
 Every tab reads the same in-memory demo state. Planned contributions never count as savings. Reloading or choosing **Reset demo** restores the sample; nothing is sent to a backend or stored persistently.
 
@@ -30,7 +32,7 @@ export const LAST_PAYDAY = '2026-11-20';
 export const NEXT_PAYDAY = '2026-12-04';
 ```
 
-Supported HTTPS formats are `youtube.com/watch?v=…`, `youtube.com/shorts/…`, `youtube.com/embed/…`, and `youtu.be/…`. The privacy-enhanced player loads when Start Here is first opened; it does not autoplay. An external YouTube link is also provided. Date edits remain in memory and cannot precede the presentation date. Reset restores December 4. This lesson is **separate from the pitch deck's future one-minute marketing video**.
+Supported HTTPS formats are `youtube.com/watch?v=…`, `youtube.com/shorts/…`, `youtube.com/embed/…`, and `youtu.be/…`. The page initially displays an original Nest Egg cover, without a fetched YouTube thumbnail or iframe. Selecting Play inserts a privacy-enhanced YouTube player in a native dialog and requests playback. Close or Escape removes the iframe and restores focus. Provider controls/content remain unmodified; an external YouTube link is always available. The player may show provider imagery while loading, pausing, or ending. Date edits remain in memory and cannot precede the presentation date. Reset restores December 4. This lesson is **separate from the pitch deck's future one-minute marketing video**.
 
 ## Files and local use
 

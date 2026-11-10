@@ -1,5 +1,5 @@
-import { createDemo, summary, moneyToCents, validateDraft, updatePlan, recordSavings, undoSavings, parseYouTubeUrl, isValidPayday } from './model.js?v=4';
-import { YOUTUBE_URL, YOUTUBE_TITLE, DEMO_AS_OF, LAST_PAYDAY, NEXT_PAYDAY } from './config.js?v=4';
+import { createDemo, summary, moneyToCents, validateDraft, updatePlan, recordSavings, undoSavings, parseYouTubeUrl, isValidPayday, savingsLedger } from './model.js?v=1.1';
+import { YOUTUBE_URL, YOUTUBE_TITLE, DEMO_AS_OF, LAST_PAYDAY, NEXT_PAYDAY } from './config.js?v=1.1';
 
 const $ = id => document.getElementById(id);
 const all = selector => [...document.querySelectorAll(selector)];
@@ -28,7 +28,6 @@ function showTab(name, focus = false) {
   const key = ['plan','start','progress'].includes(name) ? name : 'plan';
   all('.tab').forEach(tab => { const selected = tab.id === `tab-${key}`; tab.classList.toggle('active',selected); tab.setAttribute('aria-selected',String(selected)); tab.tabIndex = selected ? 0 : -1; });
   all('.tab-panel').forEach(panel => { panel.hidden = panel.id !== key; });
-  if (key === 'start') mountLessonVideo();
   if (focus) $(key).querySelector('h1').focus({preventScroll:true});
 }
 
@@ -169,10 +168,11 @@ function updateDraftPreview(showPreview = true) {
   $('contribution-slider').value = String(Math.min(usablePay,contribution ?? 0) / 100);
   $('contribution-slider').setAttribute('aria-valuetext',`${money(contribution ?? 0)} per paycheck`);
   $('slider-max').textContent = `${money(usablePay)} paycheck`;
-  $('allocation-percent').textContent = contribution !== null ? `${Math.round(contribution / usablePay * 100)}% of pay` : 'Choose an amount';
+  $('allocation-percent').textContent = contribution !== null ? `${Math.round(contribution / usablePay * 100)}% of your ${money(usablePay)} pay` : 'Choose an amount';
   $('allocation-fill').style.width = `${ratio}%`;
   $('allocation-goal').textContent = contribution !== null ? money(contribution) : '—';
   $('allocation-rest').textContent = contribution !== null ? money(Math.max(0,usablePay-contribution)) : '—';
+  $('plan-cadence').textContent = contribution !== null ? `If repeated every two weeks: about ${money(Math.round(contribution * 26 / 12))}/month, averaged over a year.` : 'Choose a planned amount to see its monthly equivalent.';
   $('draft-preview').hidden = !showPreview || !valid;
   if (showPreview && valid) {
     const preview = summary({...state,...values});
@@ -184,7 +184,7 @@ function render() {
   const s = summary(state);
   const percentText = `${Math.floor(s.percent)}%`;
   const countText = s.remaining === 0 ? 'You reached your goal!' : s.paychecks === null ? 'Choose your next amount' : `${s.paychecks} ${s.paychecks === 1 ? 'paycheck' : 'paychecks'} to go`;
-  const bindings = { goalName:state.goalName, target:money(state.targetCents), saved:money(s.saved), remaining:money(s.remaining), paycheck:money(state.paycheckCents), percent:percentText, paychecks:countText, 'contribution-summary':s.remaining === 0 ? 'A small plan. A real milestone.' : `At ${money(state.contributionCents)} per paycheck` };
+  const bindings = { goalName:state.goalName, target:money(state.targetCents), saved:money(s.saved), remaining:money(s.remaining), paycheck:money(state.paycheckCents), contribution:money(state.contributionCents), percent:percentText, paychecks:countText, 'contribution-summary':s.remaining === 0 ? 'Goal reached' : s.paychecks===null ? 'No forecast at $0' : `${money(state.contributionCents)} each payday · final ${money(s.remaining-(s.paychecks-1)*state.contributionCents)}` };
   all('[data-bind]').forEach(el => { el.textContent = bindings[el.dataset.bind]; });
   document.querySelector('.goal-amount > [data-bind="saved"]').style.fontSize = s.saved >= 10000000 ? '36px' : '';
   document.querySelector('.goal-title-row .muted').textContent = state.goalName === 'First place fund' ? 'A place near campus. A little independence.' : 'One goal. A little more possibility.';
@@ -211,7 +211,7 @@ function render() {
   $('saved-amount').disabled = s.remaining === 0;
   $('last-checkin').hidden = !state.entries.length;
   if (state.entries.length) $('last-checkin-copy').textContent = `Last check-in: ${money(state.entries.at(-1).amountCents)} recorded by you. ${state.entries.length} ${state.entries.length === 1 ? 'check-in' : 'check-ins'} in this demo.`;
-  renderSavingsHistory();
+  renderSavingsHistory(); renderSavingsLog();
 }
 
 form.addEventListener('input',() => { updateDraftPreview(); setError('plan-error'); });
@@ -227,9 +227,10 @@ form.addEventListener('submit',event => {
     formFields[first].focus();
     return;
   }
+  const historyAdjusted=savingsLedger(state).months>0 && result.values.startingCents!==state.startingCents;
   state = updatePlan(state,result.values);
   populateForm(); render(); setError('record-error');
-  notify('Your plan is updated. Small steps, your pace.');
+  notify(historyAdjusted?'Plan updated. Adjusted starting balance shown; Reset demo restores the monthly history.':'Your plan is updated. Small steps, your pace.');
 });
 
 $('plan-contribution').addEventListener('click',() => {
@@ -263,7 +264,7 @@ $('record-form').addEventListener('submit',event => {
     const amount = moneyToCents($('saved-amount').value);
     const next = recordSavings(state,amount);
     state = next; render(); setError('record-error'); $('saved-amount').removeAttribute('aria-invalid');
-    notify(summary(state).remaining === 0 ? 'Goal reached. That’s a beginning worth celebrating.' : `${money(amount)} recorded as saved. A little closer.`);
+    notify(summary(state).remaining === 0 ? 'Goal reached. That’s a beginning worth celebrating.' : `${money(amount)} added to your log. ${money(summary(state).saved)} of ${money(state.targetCents)} saved.`);
   } catch (error) {
     const remaining = summary(state).remaining;
     setError('record-error',error.message + (remaining > 0 ? ` ${money(remaining)} remains.` : ''));
@@ -274,21 +275,49 @@ $('undo-savings').addEventListener('click',() => { state = undoSavings(state); r
 $('reset-demo').addEventListener('click',() => { state=createDemo(); payday=NEXT_PAYDAY; populateForm();render();renderPayday();setError('lesson-error');setError('record-error');setError('payday-error');$('lesson-amount').removeAttribute('aria-invalid');$('saved-amount').removeAttribute('aria-invalid');$('payday-date').removeAttribute('aria-invalid');notify('Alex’s $700 savings and December 4 payday are restored.'); });
 
 function mountLessonVideo() {
-  if (!video || $('video-embed').querySelector('iframe')) return;
+  if (!video) return;
   const frame=document.createElement('iframe');
-  frame.src=`${video.embed}?rel=0`;
+  frame.src=`${video.embed}?rel=0&autoplay=1`;
   frame.title=YOUTUBE_TITLE;
-  frame.loading='lazy';
   frame.allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share';
   frame.allowFullscreen=true;
   frame.referrerPolicy='strict-origin-when-cross-origin';
   $('video-embed').replaceChildren(frame);
+  $('video-dialog').showModal();
+  $('close-video').focus();
+}
+$('play-video').addEventListener('click',mountLessonVideo);
+$('close-video').addEventListener('click',()=>$('video-dialog').close());
+$('video-dialog').addEventListener('close',()=>{ $('video-embed').replaceChildren(); $('play-video').focus({preventScroll:true}); });
+let logReturnTarget;
+all('[data-open-log]').forEach(button=>button.addEventListener('click',()=>{ logReturnTarget=button; $('savings-log-dialog').showModal(); $('close-log').focus(); }));
+$('close-log').addEventListener('click',()=>$('savings-log-dialog').close());
+$('savings-log-dialog').addEventListener('close',()=>logReturnTarget?.focus({preventScroll:true}));
+all('dialog').forEach(dialog=>dialog.addEventListener('click',event=>{
+  if(event.target!==dialog)return;
+  const r=dialog.getBoundingClientRect();
+  if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();
+}));
+function renderSavingsLog() {
+  const ledger=savingsLedger(state);
+  const intact=ledger.averageMonthlyCents!==null;
+  $('monthly-average').textContent=intact?`${money(ledger.averageMonthlyCents)}/month`:'Custom starting balance';
+  $('average-context').textContent=intact?'Average saved · May–Nov 2026':'Monthly average unavailable';
+  $('log-average').textContent=intact?`${money(ledger.averageMonthlyCents)}/month across ${ledger.months} months`:'Not available for a custom starting balance';
+  $('savings-log-dialog').querySelector('.log-footnote').textContent=intact?'Historical average = $700 ÷ 7 months (May–November 2026). New check-ins are separate demo entries. Changes reset on reload.':'An adjusted starting balance has no recorded monthly history, so no monthly average is shown. New check-ins remain separate demo entries. Changes reset on reload.';
+  $('savings-log-rows').replaceChildren(...ledger.rows.map(entry=>{
+    const tr=document.createElement('tr');
+    [entry.label,money(entry.amountCents),money(entry.totalCents)].forEach((value,i)=>{const cell=document.createElement(i?'td':'th');if(!i)cell.scope='row';cell.textContent=value;tr.append(cell);});
+    return tr;
+  }));
 }
 if (video) {
   $('video-placeholder').hidden = true;
   $('configured-video').hidden = false;
   $('video-title').textContent = YOUTUBE_TITLE;
   $('youtube-link').href = video.watch;
+  $('modal-youtube-link').href = video.watch;
+  $('video-dialog-title').textContent = YOUTUBE_TITLE;
 } else {
   $('video-placeholder').hidden=false;
   $('configured-video').hidden=true;
