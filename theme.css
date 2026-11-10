@@ -333,3 +333,94 @@ h2 { font-weight: 550; letter-spacing: -.5px; }
   .insight-copy > span:last-child { font-size: 11px; }
   .profile-panel { top: 63px; }
 }
+
+/* Presentation timeline and an actual embedded paycheck-routine lesson. */
+.goal-amount .amount-caption strong { font-size: inherit; font-weight: 600; color: #454545; }
+.goal-history-note { display: flex; align-items: center; gap: 6px; margin: -8px 0 21px; font-size: 11px; line-height: 1.6; color: #006e84; }
+.goal-history-note .icon { width: 15px; height: 15px; }
+.payday-card { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px 30px; padding: 24px; margin: 0 0 24px; }
+.payday-overview { display: flex; align-items: start; gap: 18px; flex: 1; min-width: 0; }
+.payday-calendar { width: 63px; border: 1px solid #b9e3ec; border-radius: 13px; text-align: center; overflow: hidden; background: #f1fbfd; flex-shrink: 0; }
+.payday-calendar > span { display: block; padding: 5px 0; background: #d3eff5; color: #006f86; font-size: 10px; letter-spacing: 1px; font-weight: 650; }
+.payday-calendar strong { display: block; color: #1c1b1b; font-weight: 500; padding: 8px 0 10px; font-size: 28px; line-height: 1; }
+.payday-overview .eyebrow { font-size: 9px; color: #00738b; letter-spacing: 1.2px; margin: 0 0 7px; }
+.payday-overview h2 { font-size: 22px; line-height: 1.35; font-weight: 550; letter-spacing: -.4px; }
+.payday-context { margin: 8px 0 0; color: #626262; font-size: 12px; line-height: 1.6; }
+.last-payday { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; color: #626262; font-size: 12px; }
+.paid-badge { display: inline-flex; align-items: center; gap: 4px; color: #1d6948; background: #e7f4ec; padding: 4px 7px; border-radius: 6px; font-size: 10px; font-weight: 600; margin-right: 4px; }
+.paid-badge .icon { width: 12px; height: 12px; stroke-width: 2; }
+.payday-editor { width: 175px; flex-shrink: 0; }
+.payday-editor label { display: block; font-size: 11px; color: #505050; font-weight: 550; margin-bottom: 8px; }
+.payday-editor input { width: 100%; min-width: 0; min-height: 43px; padding: 9px 10px; color: #1c1b1b; background: #fff; border: 1px solid #cdd4d7; border-radius: 8px; font: inherit; font-size: 13px; }
+.payday-editor .small-note { display: block; font-size: 10px; margin: 7px 0 0; }
+.payday-card > .form-error { flex-basis: 100%; margin: 0; }
+.video-card .video-title { position: relative; z-index: 1; font-size: 25px; font-weight: 550; line-height: 1.3; letter-spacing: -.4px; margin: 22px 0 10px; }
+.video-summary { position: relative; z-index: 1; font-size: 13px; line-height: 1.7; color: #45626b; margin: 0; }
+#configured-video { padding: 0; margin: 18px 0; flex: 1; }
+#video-embed iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 12px; background: #132d37; }
+.video-card .video-link { margin: 14px 0 0; font-size: 12px; }
+.video-card .video-bottomline { margin-top: auto; }
+.video-card .video-placeholder { padding: 24px 0; }
+.savings-history-card { margin-top: 24px; padding: 28px 30px 22px; }
+.history-heading { display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+.history-heading .eyebrow { font-size: 9px; color: #00738b; margin: 0 0 9px; }
+.history-heading h2 { font-size: 25px; font-weight: 550; }
+.history-heading p { color: #626262; font-size: 13px; line-height: 1.7; margin: 10px 0 0; }
+.history-heading p strong { font-weight: 600; color: #454545; }
+.history-total { font-size: 34px; color: #00748d; font-weight: 550; letter-spacing: -.7px; flex-shrink: 0; text-align: right; }
+.history-total > span { display: block; color: #626262; font-size: 11px; letter-spacing: 0; font-weight: 400; margin-top: 5px; }
+.history-bars { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); list-style: none; gap: 12px; margin: 23px 0 13px; padding: 0 0 9px; border-bottom: 1px solid #dce4e7; }
+.history-bars li { display: flex; flex-direction: column; justify-content: end; align-items: center; height: 177px; gap: 7px; min-width: 0; }
+.history-value { color: #454545; font-size: 12px; line-height: 18px; }
+.history-bar { display: block; width: 68%; max-width: 64px; flex-shrink: 0; background: #007f99; border-radius: 7px 7px 2px 2px; }
+.history-bars li:last-child .history-bar { background: #51259b; }
+.history-month { color: #626262; font-size: 12px; line-height: 18px; }
+.history-note { font-size: 10px; line-height: 1.6; color: #626262; margin: 0; }
+@media (max-width:800px) {
+  .payday-card { gap: 20px; padding: 23px; }
+  .payday-overview { gap: 14px; }
+  .payday-overview h2 { font-size: 21px; }
+  .payday-editor { width: 160px; }
+  .video-card .video-title { font-size: 23px; }
+  .history-heading { align-items: start; }
+  .history-heading h2 { font-size: 23px; }
+  .history-heading p { font-size: 12px; }
+  .history-total { font-size: 30px; }
+}
+@media (max-width:600px) {
+  .payday-card { padding: 23px; margin-bottom: 18px; }
+  .payday-overview { flex-basis: 100%; gap: 13px; }
+  .payday-calendar { width: 52px; border-radius: 11px; }
+  .payday-calendar strong { font-size: 25px; }
+  .payday-overview h2 { font-size: 20px; }
+  .payday-context { font-size: 11px; }
+  .last-payday { font-size: 11px; gap: 4px; line-height: 1.6; }
+  .payday-editor { width: 100%; padding-top: 16px; border-top: 1px solid #e0e7e9; }
+  .payday-editor input { max-width: 200px; }
+  .payday-editor label { font-size: 12px; }
+  .payday-editor .small-note { font-size: 10px; }
+  .video-card .video-title { font-size: 23px; margin-top: 20px; }
+  .video-summary { font-size: 12px; }
+  .video-topline { flex-wrap: wrap; gap: 8px; }
+  #configured-video { margin: 17px 0; }
+  .savings-history-card { margin-top: 18px; padding: 25px 23px 21px; }
+  .history-heading { flex-direction: column; gap: 16px; }
+  .history-heading h2 { font-size: 23px; }
+  .history-heading p { font-size: 12px; }
+  .history-total { display: flex; align-items: baseline; gap: 10px; font-size: 30px; text-align: left; }
+  .history-total > span { display: inline; font-size: 10px; margin: 0; }
+  .history-bars { gap: 5px; margin-top: 18px; }
+  .history-bars li { height: 172px; gap: 6px; }
+  .history-value, .history-month { font-size: 11px; }
+  .history-note { font-size: 10px; }
+  .goal-history-note { font-size: 11px; margin-top: -7px; }
+}
+@media (max-width:360px) {
+  .payday-card { padding: 21px; }
+  .payday-calendar { width: 44px; }
+  .payday-overview { gap: 10px; }
+  .payday-overview h2 { font-size: 19px; }
+  .savings-history-card { padding-left: 20px; padding-right: 20px; }
+  .history-heading h2 { font-size: 22px; }
+  .history-total { gap: 8px; }
+}

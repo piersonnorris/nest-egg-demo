@@ -1,11 +1,13 @@
-import { createDemo, summary, moneyToCents, validateDraft, updatePlan, recordSavings, undoSavings, parseYouTubeUrl } from './model.js';
-import { YOUTUBE_URL } from './config.js';
+import { createDemo, summary, moneyToCents, validateDraft, updatePlan, recordSavings, undoSavings, parseYouTubeUrl, isValidPayday } from './model.js?v=4';
+import { YOUTUBE_URL, YOUTUBE_TITLE, DEMO_AS_OF, LAST_PAYDAY, NEXT_PAYDAY } from './config.js?v=4';
 
 const $ = id => document.getElementById(id);
 const all = selector => [...document.querySelectorAll(selector)];
 const money = cents => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:cents % 100 ? 2 : 0}).format(cents / 100);
 const asInput = cents => String(cents / 100);
 let state = createDemo();
+let payday = NEXT_PAYDAY;
+const video = parseYouTubeUrl(YOUTUBE_URL);
 let toastTimer;
 const form = $('plan-form');
 const formFields = { goalName:$('goal-name'), target:$('goal-target'), savings:$('starting-savings'), paycheck:$('paycheck'), contribution:$('contribution') };
@@ -26,6 +28,7 @@ function showTab(name, focus = false) {
   const key = ['plan','start','progress'].includes(name) ? name : 'plan';
   all('.tab').forEach(tab => { const selected = tab.id === `tab-${key}`; tab.classList.toggle('active',selected); tab.setAttribute('aria-selected',String(selected)); tab.tabIndex = selected ? 0 : -1; });
   all('.tab-panel').forEach(panel => { panel.hidden = panel.id !== key; });
+  if (key === 'start') mountLessonVideo();
   if (focus) $(key).querySelector('h1').focus({preventScroll:true});
 }
 
@@ -92,6 +95,53 @@ document.addEventListener('keydown',event => {
 profileRoot.addEventListener('focusout',event => { if (!$('profile-panel').hidden && !profileRoot.contains(event.relatedTarget) && !profileButtons.some(button => button.contains(event.relatedTarget))) closeProfile(); });
 $('quick-edit-plan').addEventListener('click',() => formFields.contribution.focus());
 
+function formatDate(iso, options = {}) {
+  return new Intl.DateTimeFormat('en-US',{timeZone:'UTC',month:'long',day:'numeric',...options}).format(new Date(`${iso}T12:00:00Z`));
+}
+
+function renderPayday() {
+  $('payday-date').value = payday;
+  $('payday-date').min = DEMO_AS_OF;
+  $('payday-date-label').textContent = formatDate(payday,{weekday:'long'});
+  $('payday-date-label').dateTime = payday;
+  $('payday-month').textContent = formatDate(payday,{month:'short',day:undefined}).toUpperCase();
+  $('payday-day').textContent = payday.slice(-2);
+  $('demo-as-of').textContent = formatDate(DEMO_AS_OF,{year:'numeric'});
+  $('demo-as-of').dateTime = DEMO_AS_OF;
+  $('last-payday').textContent = formatDate(LAST_PAYDAY);
+  $('last-payday').dateTime = LAST_PAYDAY;
+}
+$('payday-date').addEventListener('change',() => {
+  const next = $('payday-date').value;
+  if (!isValidPayday(next,DEMO_AS_OF)) {
+    setError('payday-error','Choose a valid date on or after December 1, 2026 for this example.');
+    $('payday-date').setAttribute('aria-invalid','true');
+    return;
+  }
+  payday = next;
+  $('payday-date').removeAttribute('aria-invalid');
+  setError('payday-error'); renderPayday();
+});
+
+function renderSavingsHistory() {
+  const history = state.savingsHistory ?? [];
+  const total = history.reduce((sum,entry) => sum + entry.amountCents,0);
+  const showHistory = history.length > 0 && total === state.startingCents;
+  $('savings-history').hidden = !showHistory;
+  $('goal-history-note').hidden = !showHistory;
+  if (!showHistory) return;
+  let cumulative = 0;
+  const bars = history.map(entry => {
+    cumulative += entry.amountCents;
+    const li = document.createElement('li');
+    const value = document.createElement('span'); value.className='history-value'; value.textContent=money(cumulative);
+    const bar = document.createElement('span'); bar.className='history-bar'; bar.style.height=`${cumulative / total * 120}px`; bar.setAttribute('aria-hidden','true');
+    const month = document.createElement('span'); month.className='history-month'; month.textContent=entry.month;
+    li.append(value,bar,month); return li;
+  });
+  $('history-bars').replaceChildren(...bars);
+}
+
 function populateForm() {
   formFields.goalName.value = state.goalName;
   formFields.target.value = asInput(state.targetCents);
@@ -134,9 +184,9 @@ function render() {
   const s = summary(state);
   const percentText = `${Math.floor(s.percent)}%`;
   const countText = s.remaining === 0 ? 'You reached your goal!' : s.paychecks === null ? 'Choose your next amount' : `${s.paychecks} ${s.paychecks === 1 ? 'paycheck' : 'paychecks'} to go`;
-  const bindings = { goalName:state.goalName, target:money(state.targetCents), saved:money(s.saved), percent:percentText, paychecks:countText, 'contribution-summary':s.remaining === 0 ? 'A small plan. A real milestone.' : `At ${money(state.contributionCents)} per paycheck` };
+  const bindings = { goalName:state.goalName, target:money(state.targetCents), saved:money(s.saved), remaining:money(s.remaining), paycheck:money(state.paycheckCents), percent:percentText, paychecks:countText, 'contribution-summary':s.remaining === 0 ? 'A small plan. A real milestone.' : `At ${money(state.contributionCents)} per paycheck` };
   all('[data-bind]').forEach(el => { el.textContent = bindings[el.dataset.bind]; });
-  document.querySelector('.goal-amount [data-bind="target"]').style.fontSize = state.targetCents >= 10000000 ? '36px' : '';
+  document.querySelector('.goal-amount > [data-bind="saved"]').style.fontSize = s.saved >= 10000000 ? '36px' : '';
   document.querySelector('.goal-title-row .muted').textContent = state.goalName === 'First place fund' ? 'A place near campus. A little independence.' : 'One goal. A little more possibility.';
   $('plan-progress').setAttribute('aria-valuenow',String(s.percent.toFixed(2)));
   $('plan-progress').setAttribute('aria-valuetext',`${money(s.saved)} saved toward ${money(state.targetCents)}`);
@@ -161,6 +211,7 @@ function render() {
   $('saved-amount').disabled = s.remaining === 0;
   $('last-checkin').hidden = !state.entries.length;
   if (state.entries.length) $('last-checkin-copy').textContent = `Last check-in: ${money(state.entries.at(-1).amountCents)} recorded by you. ${state.entries.length} ${state.entries.length === 1 ? 'check-in' : 'check-ins'} in this demo.`;
+  renderSavingsHistory();
 }
 
 form.addEventListener('input',() => { updateDraftPreview(); setError('plan-error'); });
@@ -220,25 +271,27 @@ $('record-form').addEventListener('submit',event => {
   }
 });
 $('undo-savings').addEventListener('click',() => { state = undoSavings(state); render(); setError('record-error'); notify('Last check-in undone. Your previous balance is restored.'); if (!state.entries.length) $('saved-amount').focus(); });
-$('reset-demo').addEventListener('click',() => { state=createDemo(); populateForm();render();setError('lesson-error');setError('record-error');$('lesson-amount').removeAttribute('aria-invalid');$('saved-amount').removeAttribute('aria-invalid');notify('Fresh start. Alex’s original sample plan is back.'); });
+$('reset-demo').addEventListener('click',() => { state=createDemo(); payday=NEXT_PAYDAY; populateForm();render();renderPayday();setError('lesson-error');setError('record-error');setError('payday-error');$('lesson-amount').removeAttribute('aria-invalid');$('saved-amount').removeAttribute('aria-invalid');$('payday-date').removeAttribute('aria-invalid');notify('Alex’s $700 savings and December 4 payday are restored.'); });
 
-const video = parseYouTubeUrl(YOUTUBE_URL);
+function mountLessonVideo() {
+  if (!video || $('video-embed').querySelector('iframe')) return;
+  const frame=document.createElement('iframe');
+  frame.src=`${video.embed}?rel=0`;
+  frame.title=YOUTUBE_TITLE;
+  frame.loading='lazy';
+  frame.allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share';
+  frame.allowFullscreen=true;
+  frame.referrerPolicy='strict-origin-when-cross-origin';
+  $('video-embed').replaceChildren(frame);
+}
 if (video) {
   $('video-placeholder').hidden = true;
   $('configured-video').hidden = false;
-  $('video-status').textContent = 'YOUR FIRST-JOB LESSON';
+  $('video-title').textContent = YOUTUBE_TITLE;
   $('youtube-link').href = video.watch;
-  $('load-video').addEventListener('click',() => {
-    const frame=document.createElement('iframe');
-    frame.src=video.embed;
-    frame.title='Nest Egg first-job introduction on YouTube';
-    frame.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-    frame.allowFullscreen=true;
-    frame.referrerPolicy='strict-origin-when-cross-origin';
-    $('video-embed').replaceChildren(frame);
-    $('load-video').hidden=true;
-    $('youtube-link').focus();
-  });
+} else {
+  $('video-placeholder').hidden=false;
+  $('configured-video').hidden=true;
 }
 
-populateForm();render();
+populateForm();render();renderPayday();

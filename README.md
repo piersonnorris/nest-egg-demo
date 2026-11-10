@@ -5,8 +5,10 @@
 ## Experience
 
 - **My Plan**: an adjustable paycheck/goal calculator, with a $1,200 apartment-deposit example.
-- **Start Here**: a first-job YouTube lesson placeholder, practical starting steps, and a short “pay yourself first” lesson.
-- **My Progress**: shared goal state, learning/planning checkpoints, manual savings check-ins, and undo.
+- **Start Here**: the embedded “Do This EVERY Time You Get Paid (Paycheck Routine)” video, an editable next-payday example, practical starting steps, and a short “pay yourself first” lesson.
+- **My Progress**: a seven-month savings history, shared goal state, learning/planning checkpoints, manual savings check-ins, and undo.
+
+The classroom timeline is fixed as of **December 1, 2026**: November 20 is marked paid and December 4 is the next payday. Alex saved $100 in each month from May through November, giving her a $700 starting balance. Her $1,200 goal has $500 remaining: seven future contributions at $75, with the final contribution reduced to $50. Past monthly savings and future per-paycheck contributions are distinct.
 
 Every tab reads the same in-memory demo state. Planned contributions never count as savings. Reloading or choosing **Reset demo** restores the sample; nothing is sent to a backend or stored persistently.
 
@@ -16,15 +18,19 @@ Alex is a fictional 19-year-old Elon University student. Select the user avatar 
 
 The interface adapts the member-dashboard patterns of the SoFi reference: a teal dashboard surface, white rounded cards, restrained navigation, compact quick actions, a warm off-white page background, and purple student-membership accents. Nest Egg keeps its own original brand and fictional student experience. The public source contains no real account balances, personal account details, authenticated screenshots, proprietary font files, or SoFi product offers. `theme.css` holds this visual layer; the planner behavior remains in `app.js` and `model.js`.
 
-## Add the YouTube video
+## Video and presentation timeline
 
 Edit **`config.js`**:
 
 ```js
-export const YOUTUBE_URL = 'https://www.youtube.com/watch?v=YOUR_VIDEO_ID';
+export const YOUTUBE_URL = 'https://youtu.be/IIKr2915l2g?si=8e71qEfb5q15RZMg';
+export const YOUTUBE_TITLE = 'Do This EVERY Time You Get Paid (Paycheck Routine)';
+export const DEMO_AS_OF = '2026-12-01';
+export const LAST_PAYDAY = '2026-11-20';
+export const NEXT_PAYDAY = '2026-12-04';
 ```
 
-Use a real 11-character video ID. Supported HTTPS formats are `youtube.com/watch?v=…`, `youtube.com/shorts/…`, `youtube.com/embed/…`, and `youtu.be/…`. An empty or invalid URL keeps the intentional placeholder. A valid URL exposes an external YouTube link and a click-to-load privacy-enhanced player. No YouTube requests are made before the player is loaded. This lesson is **separate from the pitch deck's future one-minute marketing video**.
+Supported HTTPS formats are `youtube.com/watch?v=…`, `youtube.com/shorts/…`, `youtube.com/embed/…`, and `youtu.be/…`. The privacy-enhanced player loads when Start Here is first opened; it does not autoplay. An external YouTube link is also provided. Date edits remain in memory and cannot precede the presentation date. Reset restores December 4. This lesson is **separate from the pitch deck's future one-minute marketing video**.
 
 ## Files and local use
 

@@ -1,8 +1,19 @@
 export const MAX_CENTS = 100_000_000;
 
 export function createDemo() {
-  return { goalName: 'First place fund', targetCents: 120000, startingCents: 0,
+  const savingsHistory = ['May','Jun','Jul','Aug','Sep','Oct','Nov'].map(month => ({ month, amountCents: 10000 }));
+  return { goalName: 'First place fund', targetCents: 120000,
+    startingCents: savingsHistory.reduce((sum, entry) => sum + entry.amountCents, 0), savingsHistory,
     paycheckCents: 30000, contributionCents: 7500, lessonExplored: false, planned: false, entries: [] };
+}
+
+export function isValidPayday(value, asOf) {
+  const validDate = date => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date ?? '')) return false;
+    const parsed = new Date(`${date}T12:00:00Z`);
+    return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0,10) === date;
+  };
+  return validDate(value) && validDate(asOf) && value >= asOf;
 }
 
 export function moneyToCents(value) {

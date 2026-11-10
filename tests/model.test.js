@@ -1,18 +1,30 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createDemo, summary, moneyToCents, validateDraft, recordSavings, undoSavings, parseYouTubeUrl } from '../model.js';
+import { createDemo, summary, moneyToCents, validateDraft, recordSavings, undoSavings, parseYouTubeUrl, isValidPayday } from '../model.js';
+import { DEMO_AS_OF, LAST_PAYDAY, NEXT_PAYDAY, YOUTUBE_URL } from '../config.js';
 
 test('the deck example takes 16 contributions, without a promised calendar date',() => {
-  assert.equal(summary(createDemo()).paychecks,16);
-  assert.equal(summary({...createDemo(),contributionCents:8000}).paychecks,15);
-  assert.equal(summary({...createDemo(),contributionCents:7000}).paychecks,18);
+  const fromZero = {...createDemo(),startingCents:0,savingsHistory:[]};
+  assert.equal(summary(fromZero).paychecks,16);
+  assert.equal(summary({...fromZero,contributionCents:8000}).paychecks,15);
+  assert.equal(summary({...fromZero,contributionCents:7000}).paychecks,18);
+});
+test('seven monthly deposits produce a $700 starting balance and seven remaining paychecks',() => {
+  const demo=createDemo(), s=summary(demo);
+  assert.equal(demo.savingsHistory.length,7);
+  assert.ok(demo.savingsHistory.every(entry=>entry.amountCents===10000));
+  assert.equal(s.saved,70000);
+  assert.equal(s.remaining,50000);
+  assert.equal(s.paychecks,7);
+  assert.equal(summary({...demo,contributionCents:10000}).paychecks,5);
+  assert.deepEqual(undoSavings(demo),demo);
 });
 test('planning a step does not move savings; a check-in is undoable',() => {
   const planned={...createDemo(),planned:true};
-  assert.equal(summary(planned).saved,0);
+  assert.equal(summary(planned).saved,70000);
   const saved=recordSavings(planned,7500);
-  assert.equal(summary(saved).saved,7500);
-  assert.equal(summary(saved).paychecks,15);
+  assert.equal(summary(saved).saved,77500);
+  assert.equal(summary(saved).paychecks,6);
   assert.equal(saved.planned,false);
   assert.deepEqual(undoSavings(saved),planned);
 });
@@ -51,4 +63,14 @@ test('YouTube configuration accepts supported HTTPS video URLs only',() => {
   const id='abcdefghijk';
   for(const url of [`https://youtu.be/${id}`,`https://www.youtube.com/watch?v=${id}&t=1`,`https://youtube.com/shorts/${id}`]) assert.equal(parseYouTubeUrl(url).id,id);
   for(const url of ['', 'javascript:alert(1)',`https://youtube.com.evil.example/watch?v=${id}`,`http://youtu.be/${id}`,'https://youtu.be/bad']) assert.equal(parseYouTubeUrl(url),null);
+  assert.equal(parseYouTubeUrl(YOUTUBE_URL).id,'IIKr2915l2g');
+});
+test('the presentation timeline has November 20 paid and December 4 next, as of December 1',() => {
+  assert.equal(DEMO_AS_OF,'2026-12-01');
+  assert.equal(LAST_PAYDAY,'2026-11-20');
+  assert.equal(NEXT_PAYDAY,'2026-12-04');
+  assert.ok(isValidPayday(NEXT_PAYDAY,DEMO_AS_OF));
+  assert.equal(isValidPayday(LAST_PAYDAY,DEMO_AS_OF),false);
+  assert.equal(isValidPayday('2026-02-30','2026-01-01'),false);
+  assert.equal((Date.parse(NEXT_PAYDAY)-Date.parse(LAST_PAYDAY))/86400000,14);
 });
