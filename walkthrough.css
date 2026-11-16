@@ -1,4 +1,4 @@
-/* Guided 3-step walkthrough (walkthrough.js). Uses theme.css tokens. */
+/* Guided 4-step walkthrough (walkthrough.js). Uses theme.css tokens. */
 html.tour-open { overflow: hidden; }
 
 .tour { position: fixed; inset: 0; z-index: 1000; }

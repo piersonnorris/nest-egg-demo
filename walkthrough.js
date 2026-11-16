@@ -26,6 +26,14 @@ const STEPS = [
     target: '.contribution-card',
     title: 'Follow the plan',
     body: 'Choose an amount per paycheck and see how many paychecks to your goal. Your next action: set it aside at your own bank.'
+  },
+  {
+    number: 4,
+    label: 'What to do',
+    tab: 'plan',
+    target: null,
+    title: 'What to do',
+    body: "It's free for students. No real money moves. The demo resets when you reload. Try changing the amount per paycheck."
   }
 ];
 
@@ -65,11 +73,19 @@ function startTour() {
   const next = root.querySelector('.tour-next');
   const skip = root.querySelector('.tour-skip');
 
-  function currentTarget() { return document.querySelector(STEPS[index].target); }
+  function currentTarget() { return STEPS[index].target ? document.querySelector(STEPS[index].target) : null; }
 
   function place() {
+    if (!STEPS[index].target) {
+      // No target: hide the spotlight and center the card in the viewport.
+      spot.style.display = 'none';
+      card.style.left = `${Math.round((window.innerWidth - card.offsetWidth) / 2)}px`;
+      card.style.top = `${Math.round(Math.max(8, (window.innerHeight - card.offsetHeight) / 2))}px`;
+      return;
+    }
     const el = currentTarget();
     if (!el) return;
+    spot.style.display = '';
     const pad = 10;
     const vw = window.innerWidth;
     const vh = window.innerHeight;
