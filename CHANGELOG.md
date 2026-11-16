@@ -5,6 +5,7 @@ This history names the classroom website releases. Earlier development commits r
 ## [Unreleased]
 
 - Added a fourth 'What to do' step to the walkthrough.
+- Reworked the walkthrough for iPhone: each step scrolls to its section just below the header, the spotlight stops above a compact bottom sheet so the card never covers it, larger tap targets, swipe left/right to move between steps, and "Start exploring" lands on the amount-per-paycheck card.
 - Added a guided three-step walkthrough that opens on every page load: Set a goal, Learn, Follow the plan. It spotlights the real My Plan and Start Here screens, matching the pitch deck's "A personal plan in three steps" slide.
 - Skip is always available in the top-right corner; Escape also skips, and the arrow keys move between steps. Add `?tour=0` to the URL to open the site without the walkthrough.
 
