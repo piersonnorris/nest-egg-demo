@@ -2,6 +2,11 @@
 
 This history names the classroom website releases. Earlier development commits remain in Git. Release dates are publication dates; the fictional presentation timeline stays December 1, 2026.
 
+## [Unreleased]
+
+- Added a guided three-step walkthrough that opens on every page load: Set a goal, Learn, Follow the plan. It spotlights the real My Plan and Start Here screens, matching the pitch deck's "A personal plan in three steps" slide.
+- Skip is always available in the top-right corner; Escape also skips, and the arrow keys move between steps. Add `?tour=0` to the URL to open the site without the walkthrough.
+
 ## [1.2] — 2026-11-10
 
 - Replaced the original seven monthly entries with the requested five saved payments: $75, $75, $125, $50, and $150.
